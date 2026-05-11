@@ -34,7 +34,7 @@ export default function HomeScreen() {
   const [revealed, setRevealed] = useState(false);
   const [todayCard, setTodayCard] = useState<(typeof CARDS)[0] | null>(null);
   const [cardIndex, setCardIndex] = useState(0);
-  const [hasPurchased, setHasPurchased] = useState(false);
+  const [hasPurchased, setHasPurchased] = useState(true);
 
   const flipAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;

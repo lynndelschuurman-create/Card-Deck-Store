@@ -19,7 +19,7 @@ export default function DeckScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [hasPurchased, setHasPurchased] = useState(false);
+  const [hasPurchased, setHasPurchased] = useState(true);
 
   useEffect(() => {
     AsyncStorage.getItem("hasPurchased").then((v) => {
