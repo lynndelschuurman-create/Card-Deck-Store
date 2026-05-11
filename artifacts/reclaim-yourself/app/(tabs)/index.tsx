@@ -184,10 +184,19 @@ export default function HomeScreen() {
       </View>
 
       {revealed && todayCard && (
-        <View style={[styles.reflectionBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
-          <Text style={[styles.reflectionLabel, { color: colors.mutedForeground }]}>Reflection prompt</Text>
-          <Text style={[styles.reflectionText, { color: colors.foreground }]}>{todayCard.reflection}</Text>
-        </View>
+        <>
+          <View style={[styles.reflectionBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Text style={[styles.reflectionLabel, { color: colors.mutedForeground }]}>Reflection prompt</Text>
+            <Text style={[styles.reflectionText, { color: colors.foreground }]}>{todayCard.reflection}</Text>
+          </View>
+          <View style={[styles.reflectionBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Text style={[styles.reflectionLabel, { color: colors.mutedForeground }]}>Today's practice</Text>
+            <Text style={[styles.reflectionText, { color: colors.foreground }]}>{todayCard.practice}</Text>
+          </View>
+          <View style={[styles.affirmationBox, { borderLeftColor: colors.gold }]}>
+            <Text style={[styles.affirmationText, { color: colors.foreground }]}>{todayCard.affirmation}</Text>
+          </View>
+        </>
       )}
 
       {!hasPurchased && (
@@ -290,6 +299,13 @@ const styles = StyleSheet.create({
   },
   reflectionLabel: { fontSize: 11, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 8 },
   reflectionText: { fontSize: 15, lineHeight: 24, fontStyle: "italic" },
+  affirmationBox: {
+    width: "100%",
+    paddingLeft: 16,
+    borderLeftWidth: 3,
+    marginBottom: 20,
+  },
+  affirmationText: { fontSize: 16, lineHeight: 26, fontStyle: "italic" },
   purchasePrompt: {
     width: "100%",
     borderRadius: 16,
