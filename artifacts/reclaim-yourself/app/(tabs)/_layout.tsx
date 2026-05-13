@@ -13,11 +13,15 @@ function NativeTabLayout() {
     <NativeTabs>
       <NativeTabs.Trigger name="index">
         <Icon sf={{ default: "sparkles", selected: "sparkles" }} />
-        <Label>Today</Label>
+        <Label>Draw</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="deck">
         <Icon sf={{ default: "square.stack", selected: "square.stack.fill" }} />
         <Label>Deck</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="journal">
+        <Icon sf={{ default: "book", selected: "book.fill" }} />
+        <Label>Journal</Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );
@@ -59,7 +63,7 @@ function ClassicTabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Today",
+          title: "Draw",
           tabBarIcon: ({ color }) =>
             isIOS ? (
               <SymbolView name="sparkles" tintColor={color} size={22} />
@@ -77,6 +81,18 @@ function ClassicTabLayout() {
               <SymbolView name="square.stack" tintColor={color} size={22} />
             ) : (
               <Feather name="layers" size={22} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="journal"
+        options={{
+          title: "Journal",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="book" tintColor={color} size={22} />
+            ) : (
+              <Feather name="book-open" size={22} color={color} />
             ),
         }}
       />
