@@ -120,24 +120,16 @@ export default function HomeScreen() {
             <Animated.View
               style={[styles.card, { transform: [{ rotateY: frontInterpolate }] }, !revealed ? {} : styles.hidden]}
             >
-              <LinearGradient
-                colors={isDark ? ["#3d1c3e", "#2d1b2e"] : ["#f5e6ea", "#fdf0f4"]}
-                style={styles.cardFront}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              >
+              <View style={styles.cardFront}>
                 <Image
                   source={require("@/assets/images/hero-card.png")}
                   style={styles.cardBackImage}
                   contentFit="cover"
                 />
-                <LinearGradient
-                  colors={["transparent", isDark ? "rgba(30,15,31,0.85)" : "rgba(253,246,240,0.85)"]}
-                  style={styles.cardOverlay}
-                >
-                  <Text style={[styles.tapHint, { color: colors.mutedForeground }]}>Tap to draw</Text>
-                </LinearGradient>
-              </LinearGradient>
+                <View style={styles.cardOverlay}>
+                  <Text style={[styles.tapHint, { color: "#fff" }]}>Tap to draw</Text>
+                </View>
+              </View>
             </Animated.View>
 
             <Animated.View
@@ -230,10 +222,14 @@ const styles = StyleSheet.create({
   },
   cardBackImage: { ...StyleSheet.absoluteFillObject },
   cardOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: "flex-end",
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    justifyContent: "center",
     alignItems: "center",
-    paddingBottom: 24,
+    paddingVertical: 16,
+    backgroundColor: "rgba(0,0,0,0.28)",
   },
   tapHint: { fontSize: 13, letterSpacing: 1.5, textTransform: "uppercase" },
   cardAccentLine: { width: 40, height: 2, borderRadius: 2, marginVertical: 4 },
