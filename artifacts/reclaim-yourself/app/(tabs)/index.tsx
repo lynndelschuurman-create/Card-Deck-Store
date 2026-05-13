@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -7,7 +6,6 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
-  PanResponder,
   Platform,
   Pressable,
   ScrollView,
@@ -30,19 +28,18 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const router = useRouter();
+  const hasPurchased = true;
 
   const [revealed, setRevealed] = useState(false);
-  const [todayCard, setTodayCard] = useState<(typeof CARDS)[0] | null>(null);
+  const [currentCard, setCurrentCard] = useState<(typeof CARDS)[0]>(CARDS[0]);
   const [cardIndex, setCardIndex] = useState(0);
-  const [hasPurchased, setHasPurchased] = useState(true);
 
   const flipAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const glowAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    loadTodayCard();
-    loadPurchaseStatus();
+    drawNewCard();
     Animated.loop(
       Animated.sequence([
         Animated.timing(glowAnim, { toValue: 1, duration: 2000, useNativeDriver: true }),
@@ -51,29 +48,22 @@ export default function HomeScreen() {
     ).start();
   }, []);
 
-  const loadPurchaseStatus = async () => {
-    const val = await AsyncStorage.getItem("hasPurchased");
-    if (val === "true") setHasPurchased(true);
+  const drawNewCard = () => {
+    const randomIdx = Math.floor(Math.random() * CARDS.length);
+    setCardIndex(randomIdx);
+    setCurrentCard(CARDS[randomIdx]);
   };
 
-  const loadTodayCard = async () => {
-    const today = new Date().toDateString();
-    const stored = await AsyncStorage.getItem("todayCard");
-    const storedDate = await AsyncStorage.getItem("todayCardDate");
-
-    if (stored && storedDate === today) {
-      const card = JSON.parse(stored);
-      setTodayCard(card);
-      const idx = CARDS.findIndex((c) => c.id === card.id);
-      setCardIndex(idx >= 0 ? idx : 0);
-    } else {
-      const randomIdx = Math.floor(Math.random() * CARDS.length);
-      const card = CARDS[randomIdx];
-      setCardIndex(randomIdx);
-      setTodayCard(card);
-      await AsyncStorage.setItem("todayCard", JSON.stringify(card));
-      await AsyncStorage.setItem("todayCardDate", today);
-    }
+  const resetCard = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Animated.timing(flipAnim, {
+      toValue: 0,
+      duration: 400,
+      useNativeDriver: true,
+    }).start(() => {
+      setRevealed(false);
+      drawNewCard();
+    });
   };
 
   const flipCard = () => {
@@ -82,9 +72,7 @@ export default function HomeScreen() {
       return;
     }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Animated.parallel([
-      Animated.spring(scaleAnim, { toValue: 1.04, useNativeDriver: true, friction: 6 }),
-    ]).start();
+    Animated.spring(scaleAnim, { toValue: 1.04, useNativeDriver: true, friction: 6 }).start();
     Animated.timing(flipAnim, {
       toValue: revealed ? 0 : 1,
       duration: 600,
@@ -118,12 +106,9 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
-        <Text style={[styles.greeting, { color: colors.mutedForeground }]}>
-          {getGreeting()}
-        </Text>
-        <Text style={[styles.title, { color: colors.foreground }]}>Your Daily Card</Text>
-        <Text style={[styles.date, { color: colors.mutedForeground }]}>
-          {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
+        <Text style={[styles.title, { color: colors.foreground }]}>Draw a Card</Text>
+        <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
+          When you feel ready, tap the card
         </Text>
       </View>
 
@@ -150,7 +135,7 @@ export default function HomeScreen() {
                   colors={["transparent", isDark ? "rgba(30,15,31,0.85)" : "rgba(253,246,240,0.85)"]}
                   style={styles.cardOverlay}
                 >
-                  <Text style={[styles.tapHint, { color: colors.mutedForeground }]}>Tap to reveal</Text>
+                  <Text style={[styles.tapHint, { color: colors.mutedForeground }]}>Tap to draw</Text>
                 </LinearGradient>
               </LinearGradient>
             </Animated.View>
@@ -165,17 +150,13 @@ export default function HomeScreen() {
                 end={{ x: 1, y: 1 }}
               >
                 <View style={[styles.cardAccentLine, { backgroundColor: colors.gold }]} />
-                {todayCard && (
-                  <>
-                    <Text style={[styles.cardNumber, { color: colors.mutedForeground }]}>
-                      {String(cardIndex + 1).padStart(2, "0")} / {CARDS.length}
-                    </Text>
-                    <Text style={[styles.cardTitle, { color: colors.foreground }]}>{todayCard.title}</Text>
-                    <View style={[styles.cardDivider, { backgroundColor: colors.gold }]} />
-                    <Text style={[styles.cardMessage, { color: colors.foreground }]}>{todayCard.message}</Text>
-                    <Text style={[styles.cardPrompt, { color: colors.mutedForeground }]}>{todayCard.prompt}</Text>
-                  </>
-                )}
+                <Text style={[styles.cardNumber, { color: colors.mutedForeground }]}>
+                  {String(cardIndex + 1).padStart(2, "0")} / {CARDS.length}
+                </Text>
+                <Text style={[styles.cardTitle, { color: colors.foreground }]}>{currentCard.title}</Text>
+                <View style={[styles.cardDivider, { backgroundColor: colors.gold }]} />
+                <Text style={[styles.cardMessage, { color: colors.foreground }]}>{currentCard.message}</Text>
+                <Text style={[styles.cardPrompt, { color: colors.mutedForeground }]}>{currentCard.prompt}</Text>
                 <View style={[styles.cardAccentLine, { backgroundColor: colors.gold }]} />
               </LinearGradient>
             </Animated.View>
@@ -183,53 +164,40 @@ export default function HomeScreen() {
         </Pressable>
       </View>
 
-      {revealed && todayCard && (
+      {revealed && (
         <>
-          <View style={[styles.reflectionBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={[styles.reflectionLabel, { color: colors.mutedForeground }]}>Reflection prompt</Text>
-            <Text style={[styles.reflectionText, { color: colors.foreground }]}>{todayCard.reflection}</Text>
+          <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>Reflection prompt</Text>
+            <Text style={[styles.sectionText, { color: colors.foreground }]}>{currentCard.reflection}</Text>
           </View>
-          <View style={[styles.reflectionBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={[styles.reflectionLabel, { color: colors.mutedForeground }]}>Today's practice</Text>
-            <Text style={[styles.reflectionText, { color: colors.foreground }]}>{todayCard.practice}</Text>
-          </View>
-          <View style={[styles.affirmationBox, { borderLeftColor: colors.gold }]}>
-            <Text style={[styles.affirmationText, { color: colors.foreground }]}>{todayCard.affirmation}</Text>
-          </View>
-        </>
-      )}
 
-      {!hasPurchased && (
-        <Pressable
-          style={({ pressed }) => [styles.purchasePrompt, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 }]}
-          onPress={() => router.push("/purchase")}
-        >
-          <Text style={[styles.purchasePromptText, { color: colors.primaryForeground }]}>
-            Unlock All 44 Cards
-          </Text>
-          <Text style={[styles.purchasePromptSub, { color: "rgba(255,255,255,0.75)" }]}>
-            3 preview cards available free
-          </Text>
-        </Pressable>
+          <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
+            <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>Today's practice</Text>
+            <Text style={[styles.sectionText, { color: colors.foreground }]}>{currentCard.practice}</Text>
+          </View>
+
+          <View style={[styles.affirmationBox, { borderLeftColor: colors.gold }]}>
+            <Text style={[styles.affirmationText, { color: colors.foreground }]}>{currentCard.affirmation}</Text>
+          </View>
+
+          <Pressable
+            style={({ pressed }) => [styles.drawAgain, { borderColor: colors.primary, opacity: pressed ? 0.7 : 1 }]}
+            onPress={resetCard}
+          >
+            <Text style={[styles.drawAgainText, { color: colors.primary }]}>Draw another card</Text>
+          </Pressable>
+        </>
       )}
     </ScrollView>
   );
-}
-
-function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { alignItems: "center", paddingHorizontal: 20 },
   header: { alignItems: "center", marginBottom: 32 },
-  greeting: { fontSize: 14, letterSpacing: 1, textTransform: "uppercase", marginBottom: 6 },
-  title: { fontSize: 28, fontFamily: "PlayfairDisplay_700Bold", letterSpacing: 0.5, marginBottom: 4 },
-  date: { fontSize: 14 },
+  title: { fontSize: 28, fontFamily: "PlayfairDisplay_700Bold", letterSpacing: 0.5, marginBottom: 6, textAlign: "center" },
+  subtitle: { fontSize: 14, textAlign: "center", lineHeight: 20 },
   cardContainer: { alignItems: "center", marginBottom: 28 },
   glowRing: {
     position: "absolute",
@@ -290,30 +258,29 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
     marginTop: 4,
   },
-  reflectionBox: {
+  section: {
     width: "100%",
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
-    marginBottom: 20,
+    marginBottom: 16,
+    gap: 8,
   },
-  reflectionLabel: { fontSize: 11, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 8 },
-  reflectionText: { fontSize: 15, lineHeight: 24, fontStyle: "italic" },
+  sectionLabel: { fontSize: 11, letterSpacing: 1.5, textTransform: "uppercase" },
+  sectionText: { fontSize: 15, lineHeight: 24, fontStyle: "italic" },
   affirmationBox: {
     width: "100%",
     paddingLeft: 16,
     borderLeftWidth: 3,
-    marginBottom: 20,
+    marginBottom: 24,
   },
   affirmationText: { fontSize: 16, lineHeight: 26, fontStyle: "italic" },
-  purchasePrompt: {
-    width: "100%",
-    borderRadius: 16,
-    paddingVertical: 18,
-    paddingHorizontal: 24,
-    alignItems: "center",
-    gap: 4,
+  drawAgain: {
+    borderWidth: 1.5,
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    marginBottom: 8,
   },
-  purchasePromptText: { fontSize: 16, fontFamily: "PlayfairDisplay_700Bold", letterSpacing: 0.3 },
-  purchasePromptSub: { fontSize: 13 },
+  drawAgainText: { fontSize: 15, fontFamily: "PlayfairDisplay_700Bold", letterSpacing: 0.3 },
 });
