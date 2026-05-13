@@ -68,7 +68,7 @@ export default function PurchaseScreen() {
           contentFit="cover"
         />
 
-        <Text style={[styles.title, { color: colors.foreground }]}>Reclaim Yourself</Text>
+        <Text style={[styles.title, { color: colors.foreground }]}>Reclaim & Return</Text>
         <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
           A card deck for the woman coming home to herself
         </Text>

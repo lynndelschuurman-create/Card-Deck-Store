@@ -106,7 +106,7 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.foreground }]}>Draw a Card</Text>
+        <Text style={[styles.title, { color: colors.foreground }]}>Reclaim & Return</Text>
         <Text style={[styles.subtitle, { color: colors.mutedForeground }]}>
           When you feel ready, tap the card
         </Text>
