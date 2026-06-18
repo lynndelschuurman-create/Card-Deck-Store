@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
-import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { usePurchase } from "@/context/PurchaseContext";
 import { CARDS } from "@/constants/cards";
 
 const STORAGE_KEY = "journal_entries";
@@ -26,9 +27,50 @@ export interface JournalEntry {
   createdAt: string;
 }
 
+function JournalLocked() {
+  const colors = useColors();
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const topPad = Platform.OS === "web" ? 67 : insets.top;
+
+  return (
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.lockedInner, { paddingTop: topPad + 40, paddingBottom: insets.bottom + 100 }]}>
+        <Text style={[styles.lockEmoji]}>📓</Text>
+        <Text style={[styles.lockedTitle, { color: colors.foreground }]}>Your journal awaits</Text>
+        <Text style={[styles.lockedBody, { color: colors.mutedForeground }]}>
+          Journal is a premium feature. Write reflections for every card, revisit your entries, and track your journey home to yourself.
+        </Text>
+        <View style={[styles.lockedFeatures, { borderLeftColor: colors.gold }]}>
+          <Text style={[styles.lockedFeatureText, { color: colors.foreground }]}>
+            "Write whatever comes up for you..."
+          </Text>
+        </View>
+        <Pressable
+          style={({ pressed }) => [
+            styles.lockedBtn,
+            { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 },
+          ]}
+          onPress={() => router.push("/purchase")}
+        >
+          <Text style={styles.lockedBtnText}>Unlock for $14.99</Text>
+          <Text style={styles.lockedBtnSub}>One-time · lifetime access</Text>
+        </Pressable>
+        <Pressable onPress={() => router.push("/login")} style={styles.loginLink}>
+          <Text style={[styles.loginLinkText, { color: colors.mutedForeground }]}>
+            Already purchased?{" "}
+            <Text style={{ color: colors.primary }}>Log in to restore access</Text>
+          </Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
 export default function JournalScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { hasPurchased } = usePurchase();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   const [entries, setEntries] = useState<JournalEntry[]>([]);
@@ -39,8 +81,8 @@ export default function JournalScreen() {
   const inputRef = useRef<TextInput>(null);
 
   useEffect(() => {
-    loadEntries();
-  }, []);
+    if (hasPurchased) loadEntries();
+  }, [hasPurchased]);
 
   const loadEntries = async () => {
     try {
@@ -82,6 +124,8 @@ export default function JournalScreen() {
       },
     ]);
   };
+
+  if (!hasPurchased) return <JournalLocked />;
 
   const selectedCard = CARDS.find((c) => c.id === selectedCardId);
 
@@ -235,6 +279,34 @@ export default function JournalScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   inner: { flex: 1, paddingHorizontal: 20 },
+  lockedInner: {
+    flex: 1,
+    paddingHorizontal: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+  },
+  lockEmoji: { fontSize: 48, marginBottom: 4 },
+  lockedTitle: { fontSize: 26, fontFamily: "PlayfairDisplay_700Bold", textAlign: "center" },
+  lockedBody: { fontSize: 15, lineHeight: 24, textAlign: "center" },
+  lockedFeatures: { paddingLeft: 16, borderLeftWidth: 3, alignSelf: "stretch" },
+  lockedFeatureText: { fontSize: 15, fontStyle: "italic", lineHeight: 24 },
+  lockedBtn: {
+    alignSelf: "stretch",
+    borderRadius: 16,
+    paddingVertical: 18,
+    alignItems: "center",
+    gap: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  lockedBtnText: { color: "#fff", fontSize: 17, fontFamily: "PlayfairDisplay_700Bold" },
+  lockedBtnSub: { color: "rgba(255,255,255,0.75)", fontSize: 12 },
+  loginLink: { marginTop: 4 },
+  loginLinkText: { fontSize: 14, textAlign: "center" },
   headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 24 },
   title: { fontSize: 28, fontFamily: "PlayfairDisplay_700Bold" },
   toggle: { flexDirection: "row", borderRadius: 10, borderWidth: 1, overflow: "hidden" },

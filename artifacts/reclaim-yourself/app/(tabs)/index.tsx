@@ -16,11 +16,14 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { usePurchase } from "@/context/PurchaseContext";
 import { CARDS } from "@/constants/cards";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH * 0.78;
 const CARD_HEIGHT = CARD_WIDTH * 1.5;
+
+const FREE_CARDS = CARDS.slice(0, 3);
 
 export default function HomeScreen() {
   const colors = useColors();
@@ -28,10 +31,12 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const router = useRouter();
-  const hasPurchased = true;
+  const { hasPurchased } = usePurchase();
+
+  const pool = hasPurchased ? CARDS : FREE_CARDS;
 
   const [revealed, setRevealed] = useState(false);
-  const [currentCard, setCurrentCard] = useState<(typeof CARDS)[0]>(CARDS[0]);
+  const [currentCard, setCurrentCard] = useState<(typeof CARDS)[0]>(pool[0]);
   const [cardIndex, setCardIndex] = useState(0);
 
   const flipAnim = useRef(new Animated.Value(0)).current;
@@ -49,9 +54,9 @@ export default function HomeScreen() {
   }, []);
 
   const drawNewCard = () => {
-    const randomIdx = Math.floor(Math.random() * CARDS.length);
+    const randomIdx = Math.floor(Math.random() * pool.length);
     setCardIndex(randomIdx);
-    setCurrentCard(CARDS[randomIdx]);
+    setCurrentCard(pool[randomIdx]);
   };
 
   const resetCard = () => {
@@ -67,10 +72,6 @@ export default function HomeScreen() {
   };
 
   const flipCard = () => {
-    if (!hasPurchased && cardIndex > 2) {
-      router.push("/purchase");
-      return;
-    }
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     Animated.spring(scaleAnim, { toValue: 1.04, useNativeDriver: true, friction: 6 }).start();
     Animated.timing(flipAnim, {
@@ -163,21 +164,43 @@ export default function HomeScreen() {
             <Text style={[styles.sectionText, { color: colors.foreground }]}>{currentCard.reflection}</Text>
           </View>
 
-          <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
-            <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>Today's practice</Text>
-            <Text style={[styles.sectionText, { color: colors.foreground }]}>{currentCard.practice}</Text>
-          </View>
+          {hasPurchased ? (
+            <>
+              <View style={[styles.section, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <Text style={[styles.sectionLabel, { color: colors.mutedForeground }]}>Today's practice</Text>
+                <Text style={[styles.sectionText, { color: colors.foreground }]}>{currentCard.practice}</Text>
+              </View>
 
-          <View style={[styles.affirmationBox, { borderLeftColor: colors.gold }]}>
-            <Text style={[styles.affirmationText, { color: colors.foreground }]}>{currentCard.affirmation}</Text>
-          </View>
+              <View style={[styles.affirmationBox, { borderLeftColor: colors.gold }]}>
+                <Text style={[styles.affirmationText, { color: colors.foreground }]}>{currentCard.affirmation}</Text>
+              </View>
 
-          <Pressable
-            style={({ pressed }) => [styles.drawAgain, { borderColor: colors.primary, opacity: pressed ? 0.7 : 1 }]}
-            onPress={resetCard}
-          >
-            <Text style={[styles.drawAgainText, { color: colors.primary }]}>Draw another card</Text>
-          </Pressable>
+              <Pressable
+                style={({ pressed }) => [styles.drawAgain, { borderColor: colors.primary, opacity: pressed ? 0.7 : 1 }]}
+                onPress={resetCard}
+              >
+                <Text style={[styles.drawAgainText, { color: colors.primary }]}>Draw another card</Text>
+              </Pressable>
+            </>
+          ) : (
+            <Pressable
+              style={[styles.upgradeCard, { backgroundColor: colors.card, borderColor: colors.gold }]}
+              onPress={() => router.push("/purchase")}
+            >
+              <View style={[styles.upgradeBadge, { backgroundColor: colors.gold }]}>
+                <Text style={styles.upgradeBadgeText}>Premium</Text>
+              </View>
+              <Text style={[styles.upgradeTitle, { color: colors.foreground }]}>
+                Unlock the full experience
+              </Text>
+              <Text style={[styles.upgradeBody, { color: colors.mutedForeground }]}>
+                Get today's practice, your affirmation, all 44 cards, journaling and unlimited draws.
+              </Text>
+              <Text style={[styles.upgradeLink, { color: colors.primary }]}>
+                Purchase for $14.99 →
+              </Text>
+            </Pressable>
+          )}
         </>
       )}
     </ScrollView>
@@ -279,4 +302,23 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   drawAgainText: { fontSize: 15, fontFamily: "PlayfairDisplay_700Bold", letterSpacing: 0.3 },
+  upgradeCard: {
+    width: "100%",
+    borderRadius: 20,
+    padding: 24,
+    borderWidth: 1.5,
+    marginBottom: 16,
+    gap: 10,
+    alignItems: "flex-start",
+  },
+  upgradeBadge: {
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginBottom: 4,
+  },
+  upgradeBadgeText: { color: "#fff", fontSize: 11, fontWeight: "700", letterSpacing: 1, textTransform: "uppercase" },
+  upgradeTitle: { fontSize: 18, fontFamily: "PlayfairDisplay_700Bold" },
+  upgradeBody: { fontSize: 14, lineHeight: 22 },
+  upgradeLink: { fontSize: 15, fontFamily: "PlayfairDisplay_700Bold", marginTop: 4 },
 });

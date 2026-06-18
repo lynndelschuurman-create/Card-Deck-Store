@@ -18,6 +18,7 @@ import { useColorScheme } from "react-native";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import colors from "@/constants/colors";
+import { PurchaseProvider } from "@/context/PurchaseContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -52,6 +53,13 @@ function RootLayoutNav() {
           presentation: "card",
         }}
       />
+      <Stack.Screen
+        name="login"
+        options={{
+          headerShown: false,
+          presentation: "modal",
+        }}
+      />
     </Stack>
   );
 }
@@ -78,7 +86,9 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <GestureHandlerRootView>
             <KeyboardProvider>
-              <RootLayoutNav />
+              <PurchaseProvider>
+                <RootLayoutNav />
+              </PurchaseProvider>
             </KeyboardProvider>
           </GestureHandlerRootView>
         </QueryClientProvider>

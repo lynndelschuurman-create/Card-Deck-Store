@@ -1,8 +1,7 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   FlatList,
   Platform,
@@ -13,24 +12,21 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
+import { usePurchase } from "@/context/PurchaseContext";
 import { CARDS } from "@/constants/cards";
+
+const FREE_COUNT = 3;
 
 export default function DeckScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const [hasPurchased, setHasPurchased] = useState(true);
-
-  useEffect(() => {
-    AsyncStorage.getItem("hasPurchased").then((v) => {
-      if (v === "true") setHasPurchased(true);
-    });
-  }, []);
+  const { hasPurchased } = usePurchase();
 
   const topPad = Platform.OS === "web" ? 67 : insets.top;
 
   const renderCard = ({ item, index }: { item: (typeof CARDS)[0]; index: number }) => {
-    const locked = !hasPurchased && index > 2;
+    const locked = !hasPurchased && index >= FREE_COUNT;
     return (
       <Pressable
         style={({ pressed }) => [
@@ -55,16 +51,17 @@ export default function DeckScreen() {
           <Text style={styles.cardNumberText}>{String(index + 1).padStart(2, "0")}</Text>
         </LinearGradient>
         <View style={styles.cardInfo}>
-          <Text style={[styles.cardTitle, { color: locked ? colors.mutedForeground : colors.foreground }]} numberOfLines={1}>
+          <Text
+            style={[styles.cardTitle, { color: locked ? colors.mutedForeground : colors.foreground }]}
+            numberOfLines={1}
+          >
             {locked ? "Locked" : item.title}
           </Text>
           <Text style={[styles.cardSub, { color: colors.mutedForeground }]} numberOfLines={2}>
             {locked ? "Purchase to unlock all 44 cards" : item.theme}
           </Text>
         </View>
-        {locked && (
-          <Text style={[styles.lockIcon, { color: colors.mutedForeground }]}>🔒</Text>
-        )}
+        {locked && <Text style={[styles.lockIcon, { color: colors.mutedForeground }]}>🔒</Text>}
       </Pressable>
     );
   };
@@ -86,8 +83,23 @@ export default function DeckScreen() {
           <View style={styles.header}>
             <Text style={[styles.headerTitle, { color: colors.foreground }]}>The Deck</Text>
             <Text style={[styles.headerSub, { color: colors.mutedForeground }]}>
-              44 cards for coming home to yourself
+              {hasPurchased
+                ? "44 cards for coming home to yourself"
+                : `${FREE_COUNT} free cards · purchase to unlock all 44`}
             </Text>
+            {!hasPurchased && (
+              <Pressable
+                style={[styles.unlockBanner, { backgroundColor: colors.card, borderColor: colors.gold }]}
+                onPress={() => router.push("/purchase")}
+              >
+                <Text style={[styles.unlockBannerText, { color: colors.foreground }]}>
+                  ✨ Unlock all 44 cards for $14.99
+                </Text>
+                <Text style={[styles.unlockBannerSub, { color: colors.mutedForeground }]}>
+                  One-time purchase · lifetime access
+                </Text>
+              </Pressable>
+            )}
           </View>
         }
         scrollEnabled={true}
@@ -98,9 +110,18 @@ export default function DeckScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { marginBottom: 20 },
+  header: { marginBottom: 20, gap: 4 },
   headerTitle: { fontSize: 28, fontFamily: "PlayfairDisplay_700Bold", marginBottom: 4 },
   headerSub: { fontSize: 14, lineHeight: 20 },
+  unlockBanner: {
+    marginTop: 16,
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1.5,
+    gap: 4,
+  },
+  unlockBannerText: { fontSize: 15, fontFamily: "PlayfairDisplay_700Bold" },
+  unlockBannerSub: { fontSize: 12 },
   cardItem: {
     flexDirection: "row",
     alignItems: "center",
