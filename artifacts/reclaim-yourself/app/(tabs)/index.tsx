@@ -6,6 +6,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Dimensions,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -14,11 +15,13 @@ import {
   View,
   useColorScheme,
 } from "react-native";
+
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { usePurchase } from "@/context/PurchaseContext";
 import { CARDS } from "@/constants/cards";
 
+const STRIPE_URL = "https://buy.stripe.com/7sYdR97dpeBl8Nh4QO7AI00";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH * 0.78;
 const CARD_HEIGHT = CARD_WIDTH * 1.5;
@@ -183,10 +186,7 @@ export default function HomeScreen() {
               </Pressable>
             </>
           ) : (
-            <Pressable
-              style={[styles.upgradeCard, { backgroundColor: colors.card, borderColor: colors.gold }]}
-              onPress={() => router.push("/purchase")}
-            >
+            <View style={[styles.upgradeCard, { backgroundColor: colors.card, borderColor: colors.gold }]}>
               <View style={[styles.upgradeBadge, { backgroundColor: colors.gold }]}>
                 <Text style={styles.upgradeBadgeText}>Premium</Text>
               </View>
@@ -196,10 +196,18 @@ export default function HomeScreen() {
               <Text style={[styles.upgradeBody, { color: colors.mutedForeground }]}>
                 Get today's practice, your affirmation, all 44 cards, journaling and unlimited draws.
               </Text>
-              <Text style={[styles.upgradeLink, { color: colors.primary }]}>
-                Purchase for $14.99 →
-              </Text>
-            </Pressable>
+              <Pressable
+                style={({ pressed }) => [styles.upgradeBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 }]}
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); Linking.openURL(STRIPE_URL); }}
+              >
+                <Text style={styles.upgradeBtnText}>Unlock Premium Access — $14.99</Text>
+              </Pressable>
+              <Pressable onPress={() => router.push("/login")}>
+                <Text style={[styles.upgradeLoginText, { color: colors.mutedForeground }]}>
+                  Already purchased? <Text style={{ color: colors.primary }}>Log in</Text>
+                </Text>
+              </Pressable>
+            </View>
           )}
         </>
       )}
@@ -321,4 +329,18 @@ const styles = StyleSheet.create({
   upgradeTitle: { fontSize: 18, fontFamily: "PlayfairDisplay_700Bold" },
   upgradeBody: { fontSize: 14, lineHeight: 22 },
   upgradeLink: { fontSize: 15, fontFamily: "PlayfairDisplay_700Bold", marginTop: 4 },
+  upgradeBtn: {
+    alignSelf: "stretch",
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: "center",
+    marginTop: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  upgradeBtnText: { color: "#fff", fontSize: 16, fontFamily: "PlayfairDisplay_700Bold" },
+  upgradeLoginText: { fontSize: 13, textAlign: "center", alignSelf: "center" },
 });

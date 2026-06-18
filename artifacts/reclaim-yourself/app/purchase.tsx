@@ -2,22 +2,21 @@ import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import {
-  ActivityIndicator,
-  KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
+
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { usePurchase } from "@/context/PurchaseContext";
 import { useColors } from "@/hooks/useColors";
 
+const STRIPE_URL = "https://buy.stripe.com/7sYdR97dpeBl8Nh4QO7AI00";
 const PRICE = "$14.99";
 
 const FEATURES = [
@@ -33,34 +32,8 @@ export default function PurchaseScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { purchase } = usePurchase();
-
-  const [email, setEmail] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
-
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   const bottomPad = Platform.OS === "web" ? 34 : insets.bottom;
-
-  const validateEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim());
-
-  const handlePurchase = async () => {
-    if (!validateEmail(email)) {
-      setEmailError("Please enter a valid email address so we can send your receipt and let you restore access later.");
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      return;
-    }
-    setEmailError("");
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setLoading(true);
-    await new Promise((r) => setTimeout(r, 1800));
-    await purchase(email);
-    setLoading(false);
-    setDone(true);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    setTimeout(() => router.replace("/(tabs)"), 1600);
-  };
 
   return (
     <LinearGradient
@@ -69,14 +42,9 @@ export default function PurchaseScreen() {
       start={{ x: 0, y: 0 }}
       end={{ x: 0, y: 1 }}
     >
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
         <ScrollView
           contentContainerStyle={[styles.container, { paddingTop: topPad + 16, paddingBottom: bottomPad + 24 }]}
           showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
         >
           <Pressable style={styles.backBtn} onPress={() => router.back()}>
             <Text style={[styles.backText, { color: colors.mutedForeground }]}>← Back</Text>
@@ -111,54 +79,19 @@ export default function PurchaseScreen() {
             "You are not lost. You are on your way home."
           </Text>
 
-          {done ? (
-            <View style={[styles.successBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              <Text style={[styles.successText, { color: colors.primary }]}>Unlocked! Welcome home.</Text>
-            </View>
-          ) : (
-            <View style={styles.purchaseSection}>
-              <Text style={[styles.emailLabel, { color: colors.mutedForeground }]}>Your email address</Text>
-              <TextInput
-                style={[
-                  styles.emailInput,
-                  {
-                    backgroundColor: colors.card,
-                    borderColor: emailError ? "#c0392b" : colors.border,
-                    color: colors.foreground,
-                  },
-                ]}
-                placeholder="your@email.com"
-                placeholderTextColor={colors.mutedForeground}
-                value={email}
-                onChangeText={(t) => { setEmail(t); setEmailError(""); }}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-              {emailError ? (
-                <Text style={styles.emailError}>{emailError}</Text>
-              ) : (
-                <Text style={[styles.emailHint, { color: colors.mutedForeground }]}>
-                  Used to restore access on any device
-                </Text>
-              )}
-
+          <View style={styles.purchaseSection}>
               <Pressable
                 style={({ pressed }) => [
                   styles.buyButton,
-                  { backgroundColor: colors.primary, opacity: pressed || loading ? 0.8 : 1 },
+                  { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 },
                 ]}
-                onPress={handlePurchase}
-                disabled={loading}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                  Linking.openURL(STRIPE_URL);
+                }}
               >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <>
-                    <Text style={styles.buyButtonText}>Purchase for {PRICE}</Text>
-                    <Text style={styles.buyButtonSub}>Secure checkout</Text>
-                  </>
-                )}
+                <Text style={styles.buyButtonText}>Unlock Premium Access — {PRICE}</Text>
+                <Text style={styles.buyButtonSub}>Opens secure Stripe checkout</Text>
               </Pressable>
 
               <Pressable onPress={() => router.push("/login")} style={styles.loginRow}>
@@ -168,13 +101,7 @@ export default function PurchaseScreen() {
                 </Text>
               </Pressable>
             </View>
-          )}
-
-          <Text style={[styles.note, { color: colors.mutedForeground }]}>
-            Payment integration coming soon. This is a preview of the purchase flow.
-          </Text>
         </ScrollView>
-      </KeyboardAvoidingView>
     </LinearGradient>
   );
 }

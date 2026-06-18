@@ -6,6 +6,7 @@ import {
   Alert,
   FlatList,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   StyleSheet,
@@ -13,11 +14,13 @@ import {
   TextInput,
   View,
 } from "react-native";
+
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { usePurchase } from "@/context/PurchaseContext";
 import { CARDS } from "@/constants/cards";
 
+const STRIPE_URL = "https://buy.stripe.com/7sYdR97dpeBl8Nh4QO7AI00";
 const STORAGE_KEY = "journal_entries";
 
 export interface JournalEntry {
@@ -51,9 +54,9 @@ function JournalLocked() {
             styles.lockedBtn,
             { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 },
           ]}
-          onPress={() => router.push("/purchase")}
+          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); Linking.openURL(STRIPE_URL); }}
         >
-          <Text style={styles.lockedBtnText}>Unlock for $14.99</Text>
+          <Text style={styles.lockedBtnText}>Unlock Premium Access — $14.99</Text>
           <Text style={styles.lockedBtnSub}>One-time · lifetime access</Text>
         </Pressable>
         <Pressable onPress={() => router.push("/login")} style={styles.loginLink}>

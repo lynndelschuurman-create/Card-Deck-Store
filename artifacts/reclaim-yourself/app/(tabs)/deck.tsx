@@ -4,17 +4,20 @@ import { useRouter } from "expo-router";
 import React from "react";
 import {
   FlatList,
+  Linking,
   Platform,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 import { usePurchase } from "@/context/PurchaseContext";
 import { CARDS } from "@/constants/cards";
 
+const STRIPE_URL = "https://buy.stripe.com/7sYdR97dpeBl8Nh4QO7AI00";
 const FREE_COUNT = 3;
 
 export default function DeckScreen() {
@@ -35,7 +38,8 @@ export default function DeckScreen() {
         ]}
         onPress={() => {
           if (locked) {
-            router.push("/purchase");
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            Linking.openURL(STRIPE_URL);
           } else {
             Haptics.selectionAsync();
             router.push({ pathname: "/card/[id]", params: { id: item.id } });
@@ -89,14 +93,14 @@ export default function DeckScreen() {
             </Text>
             {!hasPurchased && (
               <Pressable
-                style={[styles.unlockBanner, { backgroundColor: colors.card, borderColor: colors.gold }]}
-                onPress={() => router.push("/purchase")}
+                style={({ pressed }) => [styles.unlockBanner, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 }]}
+                onPress={() => { Haptics.selectionAsync(); Linking.openURL(STRIPE_URL); }}
               >
-                <Text style={[styles.unlockBannerText, { color: colors.foreground }]}>
-                  ✨ Unlock all 44 cards for $14.99
+                <Text style={styles.unlockBannerText}>
+                  ✨ Unlock Premium Access — $14.99
                 </Text>
-                <Text style={[styles.unlockBannerSub, { color: colors.mutedForeground }]}>
-                  One-time purchase · lifetime access
+                <Text style={styles.unlockBannerSub}>
+                  All 44 cards · one-time · lifetime access
                 </Text>
               </Pressable>
             )}
@@ -120,8 +124,8 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     gap: 4,
   },
-  unlockBannerText: { fontSize: 15, fontFamily: "PlayfairDisplay_700Bold" },
-  unlockBannerSub: { fontSize: 12 },
+  unlockBannerText: { fontSize: 15, fontFamily: "PlayfairDisplay_700Bold", color: "#fff" },
+  unlockBannerSub: { fontSize: 12, color: "rgba(255,255,255,0.8)" },
   cardItem: {
     flexDirection: "row",
     alignItems: "center",
