@@ -41,3 +41,9 @@ id = "rA5lB3eHHqwLtgB1VmJK_"
 uri = "file://attached_assets/reclaim-return-card-clean.pdf"
 type = "pdf"
 title = "Reclaim & Return — Card (Clean PDF)"
+
+[[outputs]]
+id = "hp1fsv0cDCbVob-5btNXI"
+uri = "file://attached_assets/reclaim-return-card-clean.jpg"
+type = "image"
+title = "Reclaim & Return — Card (Clean JPEG)"
