@@ -35,3 +35,9 @@ id = "12xBUXvqew_5j4SGh0Ppw"
 uri = "file://attached_assets/reclaim-return-app-screenshot.jpg"
 type = "image"
 title = "Reclaim & Return — App Screenshot"
+
+[[outputs]]
+id = "rA5lB3eHHqwLtgB1VmJK_"
+uri = "file://attached_assets/reclaim-return-card-clean.pdf"
+type = "pdf"
+title = "Reclaim & Return — Card (Clean PDF)"
