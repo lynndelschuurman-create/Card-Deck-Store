@@ -29,3 +29,9 @@ id = "9_2H9JRE69s9Bb7rfKEXG"
 uri = "file://attached_assets/reclaim-return-product.png"
 type = "image"
 title = "Reclaim & Return — Product Image"
+
+[[outputs]]
+id = "12xBUXvqew_5j4SGh0Ppw"
+uri = "file://attached_assets/reclaim-return-app-screenshot.jpg"
+type = "image"
+title = "Reclaim & Return — App Screenshot"
