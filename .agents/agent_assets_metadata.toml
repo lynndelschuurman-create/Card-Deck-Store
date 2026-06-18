@@ -47,3 +47,9 @@ id = "hp1fsv0cDCbVob-5btNXI"
 uri = "file://attached_assets/reclaim-return-card-clean.jpg"
 type = "image"
 title = "Reclaim & Return — Card (Clean JPEG)"
+
+[[outputs]]
+id = "-zsBliZmIVRp3_lHaL5rj"
+uri = "file://attached_assets/reclaim-return-titled.jpg"
+type = "image"
+title = "Reclaim & Return — Card with Title"
