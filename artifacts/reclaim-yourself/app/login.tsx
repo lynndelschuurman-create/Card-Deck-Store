@@ -39,10 +39,10 @@ export default function LoginScreen() {
     setLoading(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-    const found = await login(email);
+    const result = await login(email);
     setLoading(false);
 
-    if (found) {
+    if (result === "verified" || result === "offline") {
       setSuccess(true);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setTimeout(() => router.replace("/(tabs)"), 1400);
