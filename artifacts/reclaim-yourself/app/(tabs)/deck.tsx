@@ -97,7 +97,7 @@ export default function DeckScreen() {
                 onPress={() => { Haptics.selectionAsync(); Linking.openURL(STRIPE_URL); }}
               >
                 <Text style={styles.unlockBannerText}>
-                  ✨ Unlock Premium Access — $14.99
+                  ✨ Unlock Premium Access — $22
                 </Text>
                 <Text style={styles.unlockBannerSub}>
                   All 44 cards · one-time · lifetime access

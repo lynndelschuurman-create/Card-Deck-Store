@@ -17,7 +17,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColors } from "@/hooks/useColors";
 
 const STRIPE_URL = "https://buy.stripe.com/7sYdR97dpeBl8Nh4QO7AI00";
-const PRICE = "$14.99";
+const PRICE = "$22";
 
 const FEATURES = [
   "All 44 beautifully illustrated cards",

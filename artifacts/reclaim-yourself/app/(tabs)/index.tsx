@@ -200,7 +200,7 @@ export default function HomeScreen() {
                 style={({ pressed }) => [styles.upgradeBtn, { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 }]}
                 onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); Linking.openURL(STRIPE_URL); }}
               >
-                <Text style={styles.upgradeBtnText}>Unlock Premium Access — $14.99</Text>
+                <Text style={styles.upgradeBtnText}>Unlock Premium Access — $22</Text>
               </Pressable>
               <Pressable onPress={() => router.push("/login")}>
                 <Text style={[styles.upgradeLoginText, { color: colors.mutedForeground }]}>

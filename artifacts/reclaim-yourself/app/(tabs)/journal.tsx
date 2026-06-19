@@ -56,7 +56,7 @@ function JournalLocked() {
           ]}
           onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); Linking.openURL(STRIPE_URL); }}
         >
-          <Text style={styles.lockedBtnText}>Unlock Premium Access — $14.99</Text>
+          <Text style={styles.lockedBtnText}>Unlock Premium Access — $22</Text>
           <Text style={styles.lockedBtnSub}>One-time · lifetime access</Text>
         </Pressable>
         <Pressable onPress={() => router.push("/login")} style={styles.loginLink}>
